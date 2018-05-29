@@ -44,8 +44,25 @@ Cell * selectStart(Cell ** p_p_Mass, int height, int width) {
     //выбираем ячейку для начала движения
     Cell * p_startPoint = NULL;
     srand(time(NULL));
-    int startX = rand() % width;
-    int startY = (rand() % height;
+    // 0 - top, 1 - right, 2 - bottom, 3 - left
+    int side = rand() % 4;
+    switch (side) {
+        case 0:
+            p_startPoint = p_p_Mass[0] + (rand() % width);
+            break;
+        case 1:
+            p_startPoint = p_p_Mass[rand() % height] + (width - 1);
+            break;
+        case 2:
+            p_startPoint = p_p_Mass[height - 1] + (rand() % width);
+            break;
+        case 3:
+            p_startPoint = p_p_Mass[rand() % height];
+            break;
+    }
+
+    cout << "Start point is x: " << p_startPoint->x << " y:" << p_startPoint->y;
+    return p_startPoint;
 
 }
 
@@ -70,7 +87,7 @@ int main() {
     initArray(p_p_Array, h, w);
 
 
-
+    selectStart(p_p_Array, h, w);
     cleanMemory(p_p_Array, h);
     return 0;
 }
