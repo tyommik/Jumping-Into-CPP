@@ -10,6 +10,7 @@
 #include <ctime>
 #include <stack>
 #include <vector>
+#include <random>
 
 using namespace std;
 
@@ -20,10 +21,10 @@ class Cell {
 public:
     int x;
     int y;
-    CellState Left;
-    CellState Right;
-    CellState Top;
-    CellState Bottom;
+    CellState Left = Close;
+    CellState Right = Close;
+    CellState Top = Close;
+    CellState Bottom = Close;
     bool Visited;
 };
 
@@ -32,6 +33,7 @@ void initArray(Cell **, int, int);
 void cleanMemory(Cell **, int);
 Cell * selectStart (Cell **, int, int);
 void printArray(Cell **, int, int);
+void printMaze(Cell **, int, int);
 
 void initArray(Cell ** p_p_mass, int h, int w) {
     for (int i = 0; i < h; i++) {
@@ -54,10 +56,71 @@ void printArray(Cell ** p_p_mass, int h, int w) {
     cout << endl;
 }
 
+void printMaze(Cell ** p_p_mass, int h, int w) {
+    int maze_height = h * 2 + 1;
+    int maze_width = w * 2 + 1;
+    string ** p_p_maze_mass = new string * [maze_height];
+    for (int p = 0; p < maze_height; p++ ) {
+        p_p_maze_mass[p] = new string [maze_width];
+    }
+
+    //инициализация пробелами
+    for (int i = 0; i < maze_height; i++) {
+        for (int j = 0; j < maze_width; j++) {
+            if (i % 2 == 0 && j % 2 == 0) {
+                p_p_maze_mass[i][j] = "*";
+            }
+
+            else p_p_maze_mass[i][j] = " ";
+        }
+    }
+
+    //печать путей
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+//            cout << "x: " << j << " y: " << i << endl;
+//            cout << "Top: " << (p_p_mass[i][j].Top ? "Open" : " Close") << endl;
+//            cout << "Right: " << (p_p_mass[i][j].Right ? "Open" : " Close") << endl;
+//            cout << "Left: " << (p_p_mass[i][j].Left ? "Open" : " Close") << endl;
+//            cout << "Bottom: " << (p_p_mass[i][j].Bottom ? "Open" : " Close") << endl;
+            if (p_p_mass[i][j].Top == Close) {
+                p_p_maze_mass[i * 2][j * 2 + 1] = "*";
+            }
+            if (p_p_mass[i][j].Right == Close) {
+                p_p_maze_mass[i * 2 + 1][j * 2 + 2] = "*";
+            }
+            if (p_p_mass[i][j].Left == Close) {
+                p_p_maze_mass[i * 2 + 1][j * 2] = "*";
+            }
+            if (p_p_mass[i][j].Bottom == Close) {
+                p_p_maze_mass[i * 2 + 2][j * 2 + 1] = "*";
+            }
+        }
+    }
+
+    //печать
+    for (int i = 0; i < maze_height; i++) {
+        for (int j = 0; j < maze_width; j++) {
+            cout << p_p_maze_mass[i][j];
+            //cout << p_p_mass[i][j].y <<" ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+    //заполнение ходов
+
+
+    //освобождение памяти
+    for (int p = 0; p < maze_height; p++ ) {
+        delete [] p_p_maze_mass[p];
+    }
+    delete [] p_p_maze_mass;
+}
+
 Cell * selectStart(Cell ** p_p_Mass, int height, int width) {
     //выбираем ячейку для начала движения
-    Cell * p_startPoint = NULL;
-    srand(time(NULL));
+    Cell * p_startPoint = nullptr;
+    srand(time(nullptr));
     // 0 - top, 1 - right, 2 - bottom, 3 - left
     int side = rand() % 4;
     switch (side) {
@@ -72,6 +135,9 @@ Cell * selectStart(Cell ** p_p_Mass, int height, int width) {
             break;
         case 3:
             p_startPoint = p_p_Mass[rand() % height];
+            break;
+        default:
+            p_startPoint = p_p_Mass[0] + (rand() % width);
             break;
     }
 
@@ -94,13 +160,13 @@ int main() {
     cout << "\nWidth: ";
     cin >> w;
 
-    Cell ** p_p_Array = new Cell * [h];
+    auto ** p_p_Array = new Cell * [h];
     for (int i = 0; i < h; i++) {
         p_p_Array[i] = new Cell[w];
     }
     initArray(p_p_Array, h, w);
     printArray(p_p_Array, h, w);
-    Cell * p_startPoint = NULL;
+    Cell * p_startPoint = nullptr;
 
     p_startPoint = selectStart(p_p_Array, h, w);
 
@@ -116,36 +182,38 @@ int main() {
         vector <Cell> nextstep;
 
         //ход влево
-        if (_cell.x > 0 && p_p_Array[_cell.y][_cell.x - 1].Visited == false ) {
-            cout << "Allow left" << endl;
-            cout << "pos: " << p_p_Array[_cell.y][_cell.x - 1].x << " " << p_p_Array[_cell.y][_cell.x - 1].y << endl;
+        if (_cell.x > 0 && !p_p_Array[_cell.y][_cell.x - 1].Visited) {
+            //cout << "Allow left" << endl;
+            //cout << "pos: " << p_p_Array[_cell.y][_cell.x - 1].x << " " << p_p_Array[_cell.y][_cell.x - 1].y << endl;
             nextstep.push_back(p_p_Array[_cell.y][_cell.x - 1]);
         }
         //ход вправо
-        if (_cell.x < (w - 1) && p_p_Array[_cell.y][_cell.x + 1].Visited == false) {
-            cout << "Allow right" << endl;
-            cout << "pos: " << p_p_Array[_cell.y][_cell.x + 1].x << " " << p_p_Array[_cell.y][_cell.x + 1].y<< endl;;
+        if (_cell.x < (w - 1) && !p_p_Array[_cell.y][_cell.x + 1].Visited) {
+            //cout << "Allow right" << endl;
+            //cout << "pos: " << p_p_Array[_cell.y][_cell.x + 1].x << " " << p_p_Array[_cell.y][_cell.x + 1].y<< endl;;
             nextstep.push_back(p_p_Array[_cell.y][_cell.x + 1]);
         }
         //ход вверх
-        if (_cell.y > 0 && p_p_Array[_cell.y - 1][_cell.x].Visited == false) {
-            cout << "Allow top" << endl;
-            cout << "pos: " << p_p_Array[_cell.y - 1][_cell.x].x << " " << p_p_Array[_cell.y - 1][_cell.x].y<< endl;;
+        if (_cell.y > 0 && !p_p_Array[_cell.y - 1][_cell.x].Visited) {
+            //cout << "Allow top" << endl;
+            //cout << "pos: " << p_p_Array[_cell.y - 1][_cell.x].x << " " << p_p_Array[_cell.y - 1][_cell.x].y<< endl;;
             nextstep.push_back(p_p_Array[_cell.y - 1][_cell.x]);
         }
         //ход вниз
-        if (_cell.y < (h - 1) && p_p_Array[_cell.y + 1][_cell.x].Visited == false ) {
-            cout << "Allow bottom" << endl;
-            cout << "pos: " << p_p_Array[_cell.y + 1][_cell.x].x << " " << p_p_Array[_cell.y + 1][_cell.x].y<< endl;;
+        if (_cell.y < (h - 1) && !p_p_Array[_cell.y + 1][_cell.x].Visited) {
+            //cout << "Allow bottom" << endl;
+            //cout << "pos: " << p_p_Array[_cell.y + 1][_cell.x].x << " " << p_p_Array[_cell.y + 1][_cell.x].y<< endl;;
             nextstep.push_back(p_p_Array[_cell.y + 1][_cell.x]);
         }
 
         if (!nextstep.empty()) {
-            srand(time(NULL));
+            std::random_device rd;
+            std::mt19937 mt(rd());
+            std::uniform_int_distribution<int> dist(0, nextstep.size() - 1);
 
-            int tmp_rand = rand() % nextstep.size();
-            cout << "Size is: " << nextstep.size() << endl;
-            cout << "The next step in direction " << tmp_rand << endl;
+            int tmp_rand = dist(mt);
+            //cout << "Size is: " << nextstep.size() << endl;
+            //cout << "The next step in direction " << tmp_rand << endl;
             Cell next = nextstep[tmp_rand];
 
             //Открываем сторону, в которую пошли на ячейках
@@ -153,26 +221,26 @@ int main() {
             {
                 if (_cell.x - next.x > 0)
                 {
-                    p_p_Array[_cell.x][_cell.y].Left = Open;
-                    p_p_Array[next.x][next.y].Right = Open;
+                    p_p_Array[_cell.y][_cell.x].Left = Open;
+                    p_p_Array[next.y][next.x].Right = Open;
                 }
                 else
                 {
-                    p_p_Array[_cell.x][_cell.y].Right = Open;
-                    p_p_Array[next.x][next.y].Left = Open;
+                    p_p_Array[_cell.y][_cell.x].Right = Open;
+                    p_p_Array[next.y][next.x].Left = Open;
                 }
             }
             if (next.y != _cell.y)
             {
                 if (_cell.y - next.y > 0)
                 {
-                    p_p_Array[_cell.x][_cell.y].Top = Open;
-                    p_p_Array[next.x][next.y].Bottom = Open;
+                    p_p_Array[_cell.y][_cell.x].Top = Open;
+                    p_p_Array[next.y][next.x].Bottom = Open;
                 }
                 else
                 {
-                    p_p_Array[_cell.x][_cell.y].Bottom = Open;
-                    p_p_Array[next.x][next.y].Top = Open;
+                    p_p_Array[_cell.y][_cell.x].Bottom = Open;
+                    p_p_Array[next.y][next.x].Top = Open;
                 }
             }
 
@@ -183,10 +251,14 @@ int main() {
         else
         {
             //если пойти никуда нельзя, возвращаемся к предыдущему узлу
+            //cout << "Back step" << endl;
             path.pop();
         }
-        printArray(p_p_Array, h, w);
+        //printArray(p_p_Array, h, w);
     }
+
+    //печать лабиринта
+    printMaze(p_p_Array, h, w);
 
     //очистка памяти
     cleanMemory(p_p_Array, h);
