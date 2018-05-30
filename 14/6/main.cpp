@@ -46,7 +46,8 @@ void initArray(Cell ** p_p_mass, int h, int w) {
 void printArray(Cell ** p_p_mass, int h, int w) {
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
-            cout << (1 ? p_p_mass[i][j].Visited : 0) << " ";
+            cout << (p_p_mass[i][j].Visited ? 1 : 0) << " ";
+            //cout << p_p_mass[i][j].y <<" ";
         }
         cout << endl;
     }
@@ -98,7 +99,7 @@ int main() {
         p_p_Array[i] = new Cell[w];
     }
     initArray(p_p_Array, h, w);
-
+    printArray(p_p_Array, h, w);
     Cell * p_startPoint = NULL;
 
     p_startPoint = selectStart(p_p_Array, h, w);
@@ -106,6 +107,7 @@ int main() {
     //инициализируем стек
     stack <Cell> path;
     //добавляем стартовую ячейку
+    p_startPoint->Visited = true;
     path.push(*p_startPoint);
 
     while(!path.empty()) {
@@ -114,26 +116,37 @@ int main() {
         vector <Cell> nextstep;
 
         //ход влево
-        if (_cell.x > 0 && p_p_Array[_cell.x - 1][_cell.y].Visited == false ) {
-            nextstep.push_back(p_p_Array[_cell.x - 1][_cell.y]);
+        if (_cell.x > 0 && p_p_Array[_cell.y][_cell.x - 1].Visited == false ) {
+            cout << "Allow left" << endl;
+            cout << "pos: " << p_p_Array[_cell.y][_cell.x - 1].x << " " << p_p_Array[_cell.y][_cell.x - 1].y << endl;
+            nextstep.push_back(p_p_Array[_cell.y][_cell.x - 1]);
         }
         //ход вправо
-        if (_cell.x < (w - 1) && p_p_Array[_cell.x + 1][_cell.y].Visited == false) {
-            nextstep.push_back(p_p_Array[_cell.x + 1][_cell.y]);
+        if (_cell.x < (w - 1) && p_p_Array[_cell.y][_cell.x + 1].Visited == false) {
+            cout << "Allow right" << endl;
+            cout << "pos: " << p_p_Array[_cell.y][_cell.x + 1].x << " " << p_p_Array[_cell.y][_cell.x + 1].y<< endl;;
+            nextstep.push_back(p_p_Array[_cell.y][_cell.x + 1]);
         }
         //ход вверх
-        if (_cell.y > 0 && p_p_Array[_cell.x][_cell.y + 1].Visited == false) {
-            nextstep.push_back(p_p_Array[_cell.x][_cell.y + 1]);
+        if (_cell.y > 0 && p_p_Array[_cell.y - 1][_cell.x].Visited == false) {
+            cout << "Allow top" << endl;
+            cout << "pos: " << p_p_Array[_cell.y - 1][_cell.x].x << " " << p_p_Array[_cell.y - 1][_cell.x].y<< endl;;
+            nextstep.push_back(p_p_Array[_cell.y - 1][_cell.x]);
         }
         //ход вниз
-        if (_cell.y < (h - 1) && p_p_Array[_cell.x][_cell.y - 1].Visited == false ) {
-            nextstep.push_back(p_p_Array[_cell.x][_cell.y - 1]);
+        if (_cell.y < (h - 1) && p_p_Array[_cell.y + 1][_cell.x].Visited == false ) {
+            cout << "Allow bottom" << endl;
+            cout << "pos: " << p_p_Array[_cell.y + 1][_cell.x].x << " " << p_p_Array[_cell.y + 1][_cell.x].y<< endl;;
+            nextstep.push_back(p_p_Array[_cell.y + 1][_cell.x]);
         }
 
         if (!nextstep.empty()) {
             srand(time(NULL));
 
-            Cell next = nextstep[rand() % nextstep.size()];
+            int tmp_rand = rand() % nextstep.size();
+            cout << "Size is: " << nextstep.size() << endl;
+            cout << "The next step in direction " << tmp_rand << endl;
+            Cell next = nextstep[tmp_rand];
 
             //Открываем сторону, в которую пошли на ячейках
             if (next.x != _cell.x)
@@ -163,7 +176,7 @@ int main() {
                 }
             }
 
-            p_p_Array[next.x][next.y].Visited = true;
+            p_p_Array[next.y][next.x].Visited = true;
             path.push(next);
 
         }
@@ -172,7 +185,7 @@ int main() {
             //если пойти никуда нельзя, возвращаемся к предыдущему узлу
             path.pop();
         }
-        //printArray(p_p_Array, h, w);
+        printArray(p_p_Array, h, w);
     }
 
     //очистка памяти
