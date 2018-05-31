@@ -154,6 +154,9 @@ void cleanMemory(Cell ** p_p_mass, int h) {
 }
 
 int main() {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+
     int h, w;
     cout << "Height: ";
     cin >> h;
@@ -207,8 +210,6 @@ int main() {
         }
 
         if (!nextstep.empty()) {
-            std::random_device rd;
-            std::mt19937 mt(rd());
             std::uniform_int_distribution<int> dist(0, nextstep.size() - 1);
 
             int tmp_rand = dist(mt);
