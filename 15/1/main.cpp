@@ -14,6 +14,30 @@
  */
 
 #include <iostream>
+#include <string>
+#include <ctime>
+
+std::string randomHash();
+
+std::string randomHash() {
+    char s[6];
+    for (unsigned int i = 0; i != 6; i++) {
+        s[i] = 'A' + rand() % 26;
+    }
+
+    return std::string(s);
+}
+
+struct Block {
+    std::string hash = randomHash();
+    std::string Data;
+    std::string Timestamp;
+    int number;
+    Block * nextBlock;
+};
+
+Block * p_headBlock = nullptr;
+unsigned blockCounter = 0;
 
 void menu ();
 void removeBlock();
@@ -22,12 +46,16 @@ void findBlock();
 void printBlocks();
 void exit();
 
+
 void removeBlock() {
 
 }
 
 void addBlock() {
-
+    Block * newBlock = new Block;
+    newBlock->number = ++blockCounter;
+    newBlock->nextBlock = p_headBlock;
+    p_headBlock = newBlock;
 }
 
 void findBlock() {
@@ -35,7 +63,15 @@ void findBlock() {
 }
 
 void printBlocks() {
-
+    Block * iter = p_headBlock;
+    if (p_headBlock != nullptr) {
+        while (iter != nullptr && iter->nextBlock != nullptr) {
+            std::cout << iter->number << std::endl;
+            std::cout << iter->hash << std::endl;
+            iter = iter->nextBlock;
+            std::cout <<std::endl;
+        }
+    }
 }
 
 void exit() {
@@ -47,9 +83,9 @@ void menu () {
     enum menuList {REMOVE = 1, ADD, FIND, PRINT, EXIT};
     do {
         std::cout << "\nPlease choose an option" << std::endl;
-        std::cout << "1. Remove person" << std::endl;
-        std::cout << "2. Add person" << std::endl;
-        std::cout << "3. Find person" << std::endl;
+        std::cout << "1. Remove block" << std::endl;
+        std::cout << "2. Add block" << std::endl;
+        std::cout << "3. Find block by hash" << std::endl;
         std::cout << "4. Print full list" << std::endl;
         std::cout << "5. Exit" << std::endl;
         std::cout << "Item: ";
@@ -79,6 +115,9 @@ void menu () {
 }
 
 int main () {
+    srand(time(nullptr));
+//    addBlock();
+//    std::cout << randomHash();
     menu();
     return 0;
 }
