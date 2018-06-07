@@ -10,7 +10,7 @@
  * 2. Напишите программу, которая добавляет элементы в связанный список в порядке его сортировки,
  * а не в начало
  *
- * 3. Напишите программу, которая находит элемент в связанном списке по его имени.
+ * 3. Напишите программу, которая находит элемент в связанном списке по его имени (хэшу).
  */
 
 #include <iostream>
@@ -31,9 +31,9 @@ std::string randomHash() {
 struct Block {
     std::string hash = randomHash();
     std::string Data;
-    std::string Timestamp;
+    std::time_t Timestamp = std::time(nullptr);
     int number;
-    Block * nextBlock;
+    Block * prevBlock;
 };
 
 Block * p_headBlock = nullptr;
@@ -45,30 +45,83 @@ void addBlock();
 void findBlock();
 void printBlocks();
 void exit();
+bool isEmpty();
 
+bool isEmpty() {
+    return (p_headBlock== nullptr);
+}
 
 void removeBlock() {
+    if (!isEmpty()) {
+        std::string hash_of_block;
+        Block *checkingBlock = p_headBlock;
+        std::cout << "Enter the hash of removing block: ";
+        std::cin >> hash_of_block;
 
+        Block *prevBlock = nullptr;
+        while (checkingBlock) {
+            //если нашли
+            if (checkingBlock->hash == hash_of_block) {
+                std::cout << "Removing block is:" << std::endl;
+                std::cout << "Block number: " << checkingBlock->number << std::endl;
+                std::cout << "Block SHA256: " << checkingBlock->hash << std::endl;
+                std::cout << "Block created: " << checkingBlock->Timestamp << std::endl;
+                //если удаляем HEAD блок
+                if (checkingBlock == p_headBlock) {
+                    p_headBlock = p_headBlock->prevBlock;
+                } else if (!checkingBlock->prevBlock) {
+                    prevBlock->prevBlock = nullptr;
+                } else {
+                    prevBlock->prevBlock = checkingBlock->prevBlock;
+                }
+                delete checkingBlock;
+                return;
+
+            }
+            prevBlock = checkingBlock;
+            checkingBlock = checkingBlock->prevBlock;
+        }
+    }
 }
 
 void addBlock() {
     Block * newBlock = new Block;
     newBlock->number = ++blockCounter;
-    newBlock->nextBlock = p_headBlock;
+    newBlock->prevBlock = p_headBlock;
     p_headBlock = newBlock;
 }
 
 void findBlock() {
+    if (!isEmpty()) {
+        std::string hash_of_block;
+        Block * checkingBlock = p_headBlock;
+        std::cout << "Enter the hash of block: ";
+        std::cin >> hash_of_block;
 
+        while (checkingBlock) {
+            if (checkingBlock->hash == hash_of_block) {
+                std::cout << "Finded block is:" << std::endl;
+                std::cout << "Block number: " << checkingBlock->number << std::endl;
+                std::cout << "Block SHA256: " << checkingBlock->hash << std::endl;
+                std::cout << "Block created: " << checkingBlock->Timestamp << std::endl;
+                return;
+            }
+            checkingBlock = checkingBlock->prevBlock;
+        }
+        std::cout << "Block not found!" << std::endl;
+    } else {
+        std::cout << "The blockchain is empty." << std:: endl;
+    }
 }
 
 void printBlocks() {
     Block * iter = p_headBlock;
-    if (p_headBlock != nullptr) {
-        while (iter != nullptr && iter->nextBlock != nullptr) {
-            std::cout << iter->number << std::endl;
-            std::cout << iter->hash << std::endl;
-            iter = iter->nextBlock;
+    if (!isEmpty()) {
+        while (iter != nullptr) {
+            std::cout << "Block number: " << iter->number << std::endl;
+            std::cout << "Block SHA256: " << iter->hash << std::endl;
+            std::cout << "Block created: " << iter->Timestamp << std::endl;
+            iter = iter->prevBlock;
             std::cout <<std::endl;
         }
     }
@@ -116,8 +169,6 @@ void menu () {
 
 int main () {
     srand(time(nullptr));
-//    addBlock();
-//    std::cout << randomHash();
     menu();
     return 0;
 }
